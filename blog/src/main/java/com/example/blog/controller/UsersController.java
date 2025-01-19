@@ -10,12 +10,12 @@ public class UsersController {
 	@GetMapping("/auth/joinForm")
 	public String joinForm() {
 		
-		return "user/joinForm";
+		return "auth/joinForm";
 	}
 
 	@GetMapping("/auth/loginForm")
 	public String loginForm() {
 		
-		return "user/loginForm";
+		return "auth/loginForm";
 	}
 }
