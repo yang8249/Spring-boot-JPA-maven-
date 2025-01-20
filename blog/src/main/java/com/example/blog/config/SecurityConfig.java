@@ -1,13 +1,20 @@
 package com.example.blog.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import com.example.blog.config.auth.PrincipalDetailService;
 
 import jakarta.servlet.DispatcherType;
 
@@ -21,8 +28,35 @@ import jakarta.servlet.DispatcherType;
 @EnableWebSecurity
 public class SecurityConfig {
 	
+	@Autowired
+	private PrincipalDetailService principalDetailService;
+	
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	protected BCryptPasswordEncoder encoder() {
+		return new BCryptPasswordEncoder();
+	}
+	
+	/*
+	 * 시큐리티가 대신 로그인할때 비밀번호를 가로채는데
+	 * 해당 password가 어떤 방법으로 암호화되었는지 알아야
+	 * DB에 저장된 해쉬값과 비교가 가능하다.
+	*/
+    @Bean
+    public AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)  // HttpSecurity에서 AuthenticationManagerBuilder 가져오기
+            .userDetailsService(principalDetailService)  // UserDetailsService 설정
+            .passwordEncoder(encoder())  // PasswordEncoder 설정
+            .and()  // 설정 완료 후
+            .build();  // AuthenticationManager 객체 생성
+    }
+	
+	@Bean
+	protected AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+	
+	@Bean
+    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		
 		http
 		 .csrf((csrfConfig) ->
@@ -34,7 +68,7 @@ public class SecurityConfig {
 		 	// 기본적으로 REQUEST 방식에 대한 필터라서 이렇게 dispatcher 설정을 해줘야한다.
 		 	// 이거 안하면 무한 리다이렉트 걸림 ㅠ
             request.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-		     .requestMatchers("/auth/**")
+		     .requestMatchers("/", "/auth/**", "/js/**", "/css/**", "/image/**")
 		     .permitAll() //permitAll은 권한없어도 OK해주는 옵션
 		     .anyRequest()
 		     .authenticated()
@@ -42,6 +76,7 @@ public class SecurityConfig {
 	     .formLogin(login -> login
 	    		 //초기 로그인 페이지를 커스텀해서 내 JSP로 넘기는 필터임.
 	 		     .loginPage("/auth/loginForm")
+	 		     .loginProcessingUrl("/auth/loginProc")
 	             .defaultSuccessUrl("/", true)
 	             .permitAll() //permitAll은 권한없어도 OK해주는 옵션
 	     );

@@ -1,5 +1,7 @@
 package com.example.blog.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,7 +11,8 @@ import com.example.blog.model.Users;
 //자동으로 Bean등록이 된다. (@Repository 어노테이션을 생략가능함)
 public interface UserRepository extends JpaRepository<Users, Integer>{
 	
-	
+	//SELECT * FROM USER username = ?
+	Optional<Users> findByUsername(String username);
 	
 	
 	

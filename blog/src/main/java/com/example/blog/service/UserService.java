@@ -1,6 +1,7 @@
 package com.example.blog.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +21,18 @@ public class UserService {
 	@Autowired
 	private UserRepository userRepository;
 	
+	@Autowired
+	private BCryptPasswordEncoder encoder;
+	
 	//이 트랜잭션 어노테이션으로 해당 서비스를 하나의 트랜잭션 단위로 묶었다.
 	@Transactional
 	public int join(Users user) {
 		try {
+			String encode = encoder.encode(user.getPassword());
+			
+			user.setPassword(encode);
 			user.setRole(RoleType.USER);
+			
 			userRepository.save(user);
 			return 1;
 		} catch (Exception e) {
