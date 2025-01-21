@@ -8,9 +8,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.blog.model.Users;
 
+import lombok.Getter;
+
 //스프링 시큐리티가 로그인 요청을 가로채서 로그인을 진행하고 
 //로그인 완료 시 UserDatils 타입의 오브젝트를 
 //스프링 시큐리티의 고유한 세션 저장소에 저장을 해준다.
+@Getter
 public class PrincipalDetail implements UserDetails{
 
 	private Users user;

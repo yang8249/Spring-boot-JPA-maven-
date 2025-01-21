@@ -3,7 +3,12 @@
 <%@ include file="../layout/header.jsp" %>
 
 <div class="container">
-	  <form action="/auth/loginProc" method="post" class="was-validated">
+
+	<!-- action="/auth/loginProc" 으로 보낸 submit이 
+		스프링 시큐리티에서 자동으로 가로채가지고 
+		authenticationManager 메서드로 이동하게된다
+	 -->
+  	<form action="/auth/loginProc" method="post" class="was-validated">
 	  <div class="form-group">
 	    <label for="username">Username</label>
 	    <input type="text" name="username" class="form-control" id="username" placeholder="Enter username" name="username" required>
