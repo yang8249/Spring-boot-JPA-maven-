@@ -42,6 +42,17 @@ public class UserService {
 		}
 	}
 
+	//회원정보 수정
+	@Transactional
+	public void updateUser(Users user) {
+		Users Persistence = userRepository.findById(user.getId())
+			.orElseThrow(()->{
+				return new IllegalArgumentException("회원 수정 실패 : 유저 정보가 없습니다.");
+			});
+		Persistence.setPassword(encoder.encode(user.getPassword()));
+		Persistence.setEmail(user.getEmail());
+	}
+
 	
 	
 //	//아래 메서드는 select라 트랜잭션에 설정을 한다.

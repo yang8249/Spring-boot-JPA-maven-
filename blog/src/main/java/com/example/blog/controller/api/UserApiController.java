@@ -3,6 +3,7 @@ package com.example.blog.controller.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +28,16 @@ public class UserApiController {
 		int result = userService.join(user);
 		return new ResponseDto<Integer>(HttpStatus.OK.value(), result);
 	}
-	
+
+	@PutMapping("/user")
+	public ResponseDto<Integer> updateUser(@RequestBody Users user) {
+		userService.updateUser(user);
+		//위 서비스가 실행되고나서 DB에 commit이 된 상태이다.
+		//하지만 시큐리티세션의 user값은 변경되지 않은상태니, 직접 변경해줘야한다.
+		
+		
+		return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
+	}
 	
 	
 	

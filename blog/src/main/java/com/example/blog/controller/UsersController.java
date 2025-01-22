@@ -18,4 +18,10 @@ public class UsersController {
 		
 		return "auth/loginForm";
 	}
+
+	@GetMapping("/auth/updateForm")
+	public String updateForm() {
+		
+		return "auth/updateForm";
+	}
 }
