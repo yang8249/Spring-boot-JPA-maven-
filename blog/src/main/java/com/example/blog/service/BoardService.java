@@ -40,9 +40,39 @@ public class BoardService {
 		}
 	}
 
-	
+	//상세보기 select
+	@Transactional(readOnly = true)
+	public Board boardDetail(int id) {	
+		return boardRepository.findById(id)
+				.orElseThrow(()->{
+					return new IllegalArgumentException("글 상세보기 실패 : 아이디를 찾을수 없습니다.");
+				})
+				;
+	}
+
+	//글 삭제하기
+	@Transactional
+	public void deleteBoard(int id) {	
+		boardRepository.deleteById(id);
+	}
+
+	//전체 글 불러오기
+	@Transactional(readOnly = true)
 	public Page<Board> selectAllBoard(Pageable pageable) {	
 		return boardRepository.findAll(pageable);
+	}
+
+	//글 수정하기
+	@Transactional
+	public void updateBoard(int id, Board board) {
+		Board PersistenceBoard = boardRepository.findById(id).orElseThrow(()->{
+			return new IllegalArgumentException("글 수정 실패 : 아이디를 찾을 수 없음.");
+		}); //select하여 영속화 한다.
+		
+		PersistenceBoard.setTitle(board.getTitle());
+		PersistenceBoard.setContent(board.getContent());
+		//영속화 후 set해주면 함수(service)종료 시 트랜잭션이 종료된다.
+		//이때에 더티체킹(영속 컨테이너와 DB와 비교)하여 자동 업뎃이 된다. 
 	}
 
 	

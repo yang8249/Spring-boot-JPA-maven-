@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.blog.config.auth.PrincipalDetail;
 import com.example.blog.model.Board;
@@ -37,6 +38,22 @@ public class BoardController {
 		return "index";
 	}
 
+	@GetMapping("/board/{id}")
+	public String findById(@PathVariable int id, Model model) {
+		//스프링 시큐리티에서 작성한 로그인처리 로직이 끝난다음에 principal 객체에 정보가 담겨진다.
+		//System.out.println("로그인 사용자 : "+principal.getUsername());
+		model.addAttribute("board", boardService.boardDetail(id));
+		return "board/detail";
+	}
+
+	@GetMapping("/board/{id}/updateForm")
+	public String boardUpdate(@PathVariable int id, Model model) {
+		//스프링 시큐리티에서 작성한 로그인처리 로직이 끝난다음에 principal 객체에 정보가 담겨진다.
+		//System.out.println("로그인 사용자 : "+principal.getUsername());
+		model.addAttribute("board", boardService.boardDetail(id));
+		return "board/updateForm";
+	}
+	
 	@GetMapping("/board/saveForm")
 	public String saveForm() {
 		//스프링 시큐리티에서 작성한 로그인처리 로직이 끝난다음에 principal 객체에 정보가 담겨진다.
