@@ -2,11 +2,18 @@ package com.example.blog.controller.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.blog.config.auth.PrincipalDetail;
 import com.example.blog.dto.ResponseDto;
 import com.example.blog.model.RoleType;
 import com.example.blog.model.Users;
@@ -20,6 +27,9 @@ public class UserApiController {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
 	@PostMapping("/auth/joinProc")
 	public ResponseDto<Integer> save(@RequestBody Users user) {
 		
@@ -30,10 +40,14 @@ public class UserApiController {
 	}
 
 	@PutMapping("/user")
-	public ResponseDto<Integer> updateUser(@RequestBody Users user) {
+	public ResponseDto<Integer> updateUser(HttpSession session, @RequestBody Users user) {
 		userService.updateUser(user);
 		//위 서비스가 실행되고나서 DB에 commit이 된 상태이다.
 		//하지만 시큐리티세션의 user값은 변경되지 않은상태니, 직접 변경해줘야한다.
+		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+		//컨텍스트홀더 객체를 선언하고 그안에 있는 컨텍스트를 꺼낸뒤
+		//인증정보를 set해주어서 수정한 user정보로 생성한 authentication 객체를 넣어준다.
+		SecurityContextHolder.getContext().setAuthentication(authentication); 
 		
 		
 		return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);

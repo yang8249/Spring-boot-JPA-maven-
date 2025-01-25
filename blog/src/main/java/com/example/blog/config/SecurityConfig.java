@@ -42,7 +42,7 @@ public class SecurityConfig {
 	 * DB에 저장된 해쉬값과 비교가 가능하다.
 	*/
     @Bean
-    public AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
+    protected AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)  // HttpSecurity에서 AuthenticationManagerBuilder 가져오기
             .userDetailsService(principalDetailService)  // UserDetailsService 설정
             .passwordEncoder(encoder())  // PasswordEncoder 설정
