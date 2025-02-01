@@ -68,7 +68,7 @@ public class SecurityConfig {
 		 	// 기본적으로 REQUEST 방식에 대한 필터라서 이렇게 dispatcher 설정을 해줘야한다.
 		 	// 이거 안하면 무한 리다이렉트 걸림 ㅠ
             request.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-		     .requestMatchers("/", "/auth/**", "/js/**", "/css/**", "/image/**")
+		     .requestMatchers("/", "/auth/**", "/js/**", "/css/**", "/img/**")
 		     .permitAll() //permitAll은 권한없어도 OK해주는 옵션
 		     .anyRequest()
 		     .authenticated()
