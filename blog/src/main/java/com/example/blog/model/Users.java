@@ -47,7 +47,9 @@ public class Users{
 
 	@Enumerated(EnumType.STRING)
 	private RoleType role;
-	
+
+    private String oauth; // kakao, google, ...
+    
 	@CreationTimestamp
 	private Timestamp createDate;
 	

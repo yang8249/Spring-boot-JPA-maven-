@@ -23,6 +23,14 @@ public class UserService {
 	
 	@Autowired
 	private BCryptPasswordEncoder encoder;
+
+	@Transactional(readOnly = true)
+	public Users findUser(String username) {
+		Users user = userRepository.findByUsername(username).orElseGet(()->{
+			return new Users();
+		});
+		return user;
+	}
 	
 	//이 트랜잭션 어노테이션으로 해당 서비스를 하나의 트랜잭션 단위로 묶었다.
 	@Transactional

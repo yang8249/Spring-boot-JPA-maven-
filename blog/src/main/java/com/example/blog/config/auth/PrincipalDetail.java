@@ -31,7 +31,7 @@ public class PrincipalDetail implements UserDetails{
 	@Override
 	public String getUsername() {
 		// TODO Auto-generated method stub
-		return user.getEmail();
+		return user.getUsername();
 	}
 
 	//계정이 만료되지 않았는지 리턴한다.
