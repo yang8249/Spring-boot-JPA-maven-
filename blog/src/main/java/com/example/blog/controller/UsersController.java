@@ -133,7 +133,7 @@ public class UsersController {
 
         // 받아온 카카오톡 프로필을 가지고 강제 회원 등록
         Users kakaoUser = Users.builder()
-                    .username(kakaoProfile.getKakao_account().getProfile().getNickname())
+                    .username(kakaoProfile.getKakao_account().getProfile().getNickname()+"_"+kakaoProfile.getId())
                     .password(ykey)
                     .email("kakao@kakao.com") //이메일 동의받는 심사를 받아야해서 임시로 넣음.
                     .oauth("kakao")
