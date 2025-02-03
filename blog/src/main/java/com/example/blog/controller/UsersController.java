@@ -15,6 +15,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,6 +29,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 //인증이 안된 유저들에 대해서는 /auth~ 경로만 허용하는 필터를 적용한다.
@@ -66,7 +69,7 @@ public class UsersController {
 
 	//@ResponseBody를 사용하면 데이터를 리턴하는 컨트롤러가 된다.
 	@GetMapping("/auth/kakao/callback")
-	public String kakaoCallback(String code) {
+	public String kakaoCallback(String code, HttpServletResponse httpServletResponse) {
 
 		//카카오 토큰발급 API 경로로 웹클라이언트 생성
         WebClient webClient = WebClient.create("https://kauth.kakao.com/oauth/token");
@@ -133,7 +136,7 @@ public class UsersController {
 
         // 받아온 카카오톡 프로필을 가지고 강제 회원 등록
         Users kakaoUser = Users.builder()
-                    .username(kakaoProfile.getKakao_account().getProfile().getNickname()+"_"+kakaoProfile.getId())
+                    .username(kakaoProfile.getKakao_account().getProfile().getNickname())
                     .password(ykey)
                     .email("kakao@kakao.com") //이메일 동의받는 심사를 받아야해서 임시로 넣음.
                     .oauth("kakao")
@@ -153,13 +156,71 @@ public class UsersController {
  		// (1. UsernamePasswordAuthenticationToken 토큰 생성시 이제 정확한 정보를 추가해줘야 한다 UserDetails, password, role)
  		// (2. SecurityContext에 Authentication 객체를 추가하면 예전에는 세션이 만들어졌다)
  		// (3. 이제는 보안때문에, 해당 컨텍스트를 세션에 직접 주입해줘야 한다 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY)
+        //kakaoUser.setPassword(ykey);
  		PrincipalDetail principalDetail = new PrincipalDetail(kakaoUser);
- 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(principalDetail, principalDetail.getPassword(), principalDetail.getAuthorities()));
+ 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(principalDetail, ykey, principalDetail.getAuthorities()));
  		SecurityContext securityContext = SecurityContextHolder.getContext();
  		securityContext.setAuthentication(authentication);
  		session.setAttribute(HttpSessionSecurityContextRepository.
  				SPRING_SECURITY_CONTEXT_KEY, securityContext);
+ 		
+ 		// 쿠키 생성 (유효기간: 1시간)
+        Cookie cookie = new Cookie("kakaoAccessToken", oauthToken.getAccess_token());
+        cookie.setMaxAge(60 * 60); // 1시간 (초 단위)
+        cookie.setPath("/"); // 모든 경로에서 접근 가능
+        cookie.setHttpOnly(true); // JavaScript에서 접근 불가 (보안 강화)
+        cookie.setSecure(false); // HTTPS에서만 전송 (개발 환경에서는 false로 변경 필요)
+
+        // 응답에 쿠키 추가
+        httpServletResponse.addCookie(cookie);
         
         return "redirect:/";
+	}
+	
+	@GetMapping("/auth/kakao/logout")
+	public String kakaoLogout(@CookieValue(value = "kakaoAccessToken", required = false) String accessToken) {
+
+        System.out.println("accessToken : " + accessToken);
+		
+//		String logoutURL = "https://kauth.kakao.com/oauth/logout?"
+//        		+ "client_id=dec6846c84164e1751cadf8f9581c8dc&"
+//        		+ "logout_redirect_uri=http://localhost:8000";
+//
+//		WebClient webClient1 = WebClient.create(logoutURL);
+//		String response1 = null;
+//		try {
+//      	
+//	        // 사용자 정보를 JSON형식으로 전달받게된다.
+//			response1 = webClient1.get()
+//	    	    .header(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=utf-8")
+//	            .retrieve() // 응답 받기
+//	            .bodyToMono(String.class) 
+//	            .block(); // 동기 방식으로 결과 가져오기
+//	        
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
+//        System.out.println("response1 !! " + response1);
+      
+		//카카오 사용자 리소스 API 경로로 웹클라이언트 재생성
+        WebClient webClient2 = WebClient.create("https://kapi.kakao.com/v1/user/logout");
+        String response2 = null;
+        try {
+        	
+	        // 사용자 정보를 JSON형식으로 전달받게된다.
+	        response2 = webClient2.post()
+	    	    .header(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=utf-8")
+	    	    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+	            .retrieve() // 응답 받기
+	            .bodyToMono(String.class) 
+	            .block(); // 동기 방식으로 결과 가져오기
+	        
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+      System.out.println("response2 !! " + response2);
+	        
+        return "redirect:/logout";
 	}
 }

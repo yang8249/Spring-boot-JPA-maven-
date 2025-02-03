@@ -20,6 +20,14 @@
 		  </div>
 	  </div>
 	  <hr/>
+	  
+	  <div>
+	  	<div>
+	  		<div class="card-body"><textarea class="form-control" rows="1" cols=""></textarea></div>
+	  		<div class="card-footer"><button class="btn btn-primary">등록</button></div>
+	  	</div>
+	  </div>
+	  
 	  <br></br>
 	  <c:if test="${board.user.id == principal.user.id}">
 		<button class="btn btn-warning"><a href="/board/${board.id}/updateForm">수정</a></button>

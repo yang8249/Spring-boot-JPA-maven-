@@ -52,7 +52,12 @@
 		       <a class="nav-link" href="/auth/updateForm">회원정보</a>
 		     </li>
 		     <li class="nav-item">
-		       <a class="nav-link" href="/logout">로그아웃</a>
+				<c:if test="${empty principal.user.oauth}">
+			       <a class="nav-link" href="/logout">로그아웃</a>
+			     </c:if>
+				<c:if test="${principal.user.oauth eq 'kakao'}">
+			       <a class="nav-link" href="/auth/kakao/logout">로그아웃</a>
+			     </c:if>
 		     </li>
 		   </ul>
 	  </c:otherwise>
